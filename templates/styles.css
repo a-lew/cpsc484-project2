@@ -3,57 +3,51 @@
 } */
 .frame { 
 	background-color:rgba(218.87500405311584, 21.887509524822235, 21.887509524822235, 1);
-	width:1920px;
-	height:1080px;
+    width: 100%;
+    height: 100%;
 	position:absolute;
 }
 .right_column { 
-	width:1333px;
-	height:1080px;
+	width:60%;
+	height:100%;
 	position:absolute;
-	left:587px;
-	top:0px;
-}
-.e1_3 { 
-	background-color:rgba(196.00000351667404, 196.00000351667404, 196.00000351667404, 1);
-	width:1333px;
-	height:1080px;
-	position:absolute;
-	left:0px;
-	top:0px;
+	right: 0px;
+    top: 0px;
+    background-color: gray;
 }
 .painting { 
-	width:1333px;
-	height:1080px;
+	width:98%;
+	height:98%;
 	position:absolute;
-	left:0px;
-	top:0px;
+	left:1%;
+	top:1%;
 	background-image:url(images/art.png);
 	background-repeat:no-repeat;
 	background-size:cover;
+    background-color: lightgray;
 }
 .left_column { 
 	background-color:rgba(255, 255, 255, 1);
-	width:587px;
-	height:1080px;
+	width:40%;
+	height:100%;
 	position:absolute;
 	left:0px;
 	top:0px;
 }
 .video_box { 
-	width:507px;
-	height:270px;
-	position:absolute;
-	left:40px;
-	top:40px;
-}
-.depth_cam { 
-	background-color:rgba(196.00000351667404, 196.00000351667404, 196.00000351667404, 1);
-	width:507px;
-	height:270px;
+	width:100%;
+	height:45%;
 	position:absolute;
 	left:0px;
 	top:0px;
+}
+.depth_cam { 
+	background-color:rgba(196.00000351667404, 196.00000351667404, 196.00000351667404, 1);
+	width:95%;
+	height:auto;
+	position:absolute;
+	left:2.5%;
+	top:10%;
 	background-image:url(images/rectangle_1.png);
 	background-repeat:no-repeat;
 	background-size:cover;
@@ -62,57 +56,57 @@
     width: 100%;
 }
 .infobox { 
-	width:507px;
-	height:466px;
+	width:100%;
+	height:40%;
 	position:absolute;
-	left:40px;
-	top:350px;
+	left:0;
+	top:50%;
 }
 .name { 
 	color:rgba(0, 0, 0, 1);
-	width:507px;
-	height:79px;
+	width:60%;
+	height:auto;
 	position:absolute;
-	left:0px;
+	left:20%;
 	top:0px;
 	font-family:Roboto;
 	text-align:left;
-	font-size:64px;
+	font-size:64px; /* change to 100px */
 	letter-spacing:0;
 }
 .author { 
 	color:rgba(0, 0, 0, 1);
-	width:507px;
-	height:79px;
+	width:60%;
+	height:auto;
 	position:absolute;
-	left:0px;
-	top:79px;
+	left:20%;
+	top:15%;
 	font-family:Roboto;
 	text-align:left;
-	font-size:48px;
+	font-size:48px; /* change to 65px */
 	letter-spacing:0;
 }
 .paragraph { 
 	color:rgba(0, 0, 0, 1);
-	width:507px;
-	height:308px;
+	width:60%;
+	height:auto;
 	position:absolute;
-	left:0px;
-	top:158px;
+	left:20%;
+	top:25%;
 	font-family:Roboto;
 	text-align:left;
-	font-size:24px;
+	font-size:24px; /* change to 45px */
 	letter-spacing:0;
 }
 .about_proj { 
 	color:rgba(0, 0, 0, 1);
-	width:507px;
-	height:79px;
+	width:80%;
+	height:auto;
 	position:absolute;
-	left:40px;
-	top:856px;
+	left:15%;
+	top:90%;
 	font-family:Roboto;
 	text-align:left;
-	font-size:24px;
+	font-size:24px; /* change to 45px */
 	letter-spacing:0;
 }
