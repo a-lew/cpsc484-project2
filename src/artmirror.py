@@ -1,5 +1,6 @@
 """Script for single-gpu/multi-gpu demo."""
 import argparse
+import json
 import logging
 import os
 import random
@@ -29,12 +30,14 @@ class Application(tornado.web.Application):
         self.args = args
         self.last_frame = None
         self.status = 'Idle'
+        self.current_artwork = random.randint(0,87)
 
         handlers = [
             (r"/", DemoHandler),
             (r"/status_app", StatusHandler),
             (r"/frames", FrameHandler),
             (r"/twod", TwoDHandler),
+            (r"/artwork", ArtworkHandler),
             (r"/(.*)", tornado.web.StaticFileHandler, {"path": "templates", "default_filename": "index.html"})
         ]
         settings = dict(
@@ -42,7 +45,14 @@ class Application(tornado.web.Application):
             static_path=os.path.join(root_path, "static")
         )
 
+        with open("posed_paintings.json", 'r') as dataset_file:
+            self.artwork_dataset = json.load(dataset_file)
+
         super().__init__(handlers, **settings)
+
+    def get_artwork_json(id):
+        pass
+
 
     @tornado.gen.coroutine
     def subscribe_frames(self):
@@ -66,18 +76,10 @@ class Application(tornado.web.Application):
             msg = yield conn.read_message()
             if msg is None: break
             if self.last_frame is None: break
-            if self.status == 'Idle':
-                # check if user is in interaction zone
-                pass
-            elif self.status == 'Capture':
-                # need to capture user pose
-                pass
-            elif self.status == 'Search':
-                #
-                pass
-            StatusHandler.send_status(str(random.randint(0,5)))
+            StatusHandler.send_status(self.status)
             FrameHandler.send_updates(self.last_frame)
             TwoDHandler.send_2d(msg)
+            ArtworkHandler.send_artwork(self.artwork_dataset[self.current_artwork])
 
             # do some predictions here
             # if self.status == 'Predict':
@@ -173,6 +175,35 @@ class FrameHandler(tornado.websocket.WebSocketHandler):
         for waiter in cls.waiters:
             try:
                 waiter.write_message(frame)
+            except:
+                logging.error("Error sending message", exc_info=True)
+
+
+
+class ArtworkHandler(tornado.websocket.WebSocketHandler):
+    waiters = set()
+
+    def check_origin(self, origin):
+        '''Allow from all origins'''
+        return True
+
+    def get_compression_options(self):
+        # Non-None enables compression with default options.
+        return {}
+
+    def open(self):
+        ArtworkHandler.waiters.add(self)
+        logging.info("connect: there are now %d connections", len(self.waiters))
+
+    def on_close(self):
+        ArtworkHandler.waiters.remove(self)
+        logging.info("disconnect: there are now %d connections", len(self.waiters))
+
+    @classmethod
+    def send_artwork(cls, artwork):
+        for waiter in cls.waiters:
+            try:
+                waiter.write_message(artwork)
             except:
                 logging.error("Error sending message", exc_info=True)
 
