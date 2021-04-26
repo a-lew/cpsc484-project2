@@ -1,0 +1,115 @@
+.1_2 { 
+	overflow:hidden;
+}
+.frame { 
+	background-color:rgba(218.87500405311584, 21.887509524822235, 21.887509524822235, 1);
+	width:1920px;
+	height:1080px;
+	position:absolute;
+}
+.right_column { 
+	width:1333px;
+	height:1080px;
+	position:absolute;
+	left:587px;
+	top:0px;
+}
+.e1_3 { 
+	background-color:rgba(196.00000351667404, 196.00000351667404, 196.00000351667404, 1);
+	width:1333px;
+	height:1080px;
+	position:absolute;
+	left:0px;
+	top:0px;
+}
+.painting { 
+	width:1333px;
+	height:1080px;
+	position:absolute;
+	left:0px;
+	top:0px;
+	background-image:url(images/art.png);
+	background-repeat:no-repeat;
+	background-size:cover;
+}
+.left_column { 
+	background-color:rgba(255, 255, 255, 1);
+	width:587px;
+	height:1080px;
+	position:absolute;
+	left:0px;
+	top:0px;
+}
+.video_box { 
+	width:507px;
+	height:270px;
+	position:absolute;
+	left:40px;
+	top:40px;
+}
+.depth_cam { 
+	background-color:rgba(196.00000351667404, 196.00000351667404, 196.00000351667404, 1);
+	width:507px;
+	height:270px;
+	position:absolute;
+	left:0px;
+	top:0px;
+	background-image:url(images/rectangle_1.png);
+	background-repeat:no-repeat;
+	background-size:cover;
+}
+.infobox { 
+	width:507px;
+	height:466px;
+	position:absolute;
+	left:40px;
+	top:350px;
+}
+.name { 
+	color:rgba(0, 0, 0, 1);
+	width:507px;
+	height:79px;
+	position:absolute;
+	left:0px;
+	top:0px;
+	font-family:Roboto;
+	text-align:left;
+	font-size:64px;
+	letter-spacing:0;
+}
+.author { 
+	color:rgba(0, 0, 0, 1);
+	width:507px;
+	height:79px;
+	position:absolute;
+	left:0px;
+	top:79px;
+	font-family:Roboto;
+	text-align:left;
+	font-size:48px;
+	letter-spacing:0;
+}
+.paragraph { 
+	color:rgba(0, 0, 0, 1);
+	width:507px;
+	height:308px;
+	position:absolute;
+	left:0px;
+	top:158px;
+	font-family:Roboto;
+	text-align:left;
+	font-size:24px;
+	letter-spacing:0;
+}
+.about_proj { 
+	color:rgba(0, 0, 0, 1);
+	width:507px;
+	height:79px;
+	position:absolute;
+	left:40px;
+	top:856px;
+	font-family:Roboto;
+	text-align:left;
+	font-size:24px;
+	letter-spacing:0;
+}
