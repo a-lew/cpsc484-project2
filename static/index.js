@@ -35,6 +35,22 @@ var frames = {
   }
 };
 
+// var artwork = {
+//     socket: null,
+//     start: function() {
+//       var url = "ws://" + location.host + "/artwork";
+//       frames.socket = new WebSocket(url);
+//       frames.socket.onmessage = function(event) {
+//         frames.process(JSON.parse(event.data));
+//       }
+//     },
+  
+//     process: function(data) {
+//       $('p.artworklog').html(data.ts)
+//   //    console.log(data)
+//     }
+//   };
+
 var status_app = {
   socket: null,
   start: function() {
@@ -47,12 +63,5 @@ var status_app = {
 
   process: function(data) {
 //    console.log(data)
-    if (parseInt(data) > 3) {
-      $('p.statuslogger').html("BIG STATUS");
-      $('img.twod').show();
-    } else{
-      $('p.statuslogger').html("LITTLE STATUS")
-      $('img.twod').hide();
-    }
   }
 };

@@ -1,6 +1,6 @@
-.1_2 { 
+/* .1_2 { 
 	overflow:hidden;
-}
+} */
 .frame { 
 	background-color:rgba(218.87500405311584, 21.887509524822235, 21.887509524822235, 1);
 	width:1920px;
@@ -57,6 +57,9 @@
 	background-image:url(images/rectangle_1.png);
 	background-repeat:no-repeat;
 	background-size:cover;
+}
+.twod{
+    width: 100%;
 }
 .infobox { 
 	width:507px;
