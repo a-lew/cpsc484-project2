@@ -2,6 +2,7 @@
 import argparse
 import json
 import logging
+import math
 import os
 import random
 import time
@@ -25,6 +26,54 @@ def ms():
     return int(round(time.time() * 1000))
 
 
+def is_user(msg):
+    # convert string to JSON dict
+    msg_dict = json.loads(msg)
+
+    # check if there are any people (at all)
+    if not 'people' in msg_dict:
+        return False
+    else:
+        for person_id in msg_dict['people'].keys():
+            person_x = msg_dict['people'][person_id]['avg_position'][0]
+            person_y = msg_dict['people'][person_id]['avg_position'][1]
+            if person_x > -600 and person_x < 600:
+                if person_y > 500 and person_y < 900:
+                    return True
+    # check if any people are in the desired range
+
+
+def shift_angle_range(angle):
+    if angle >= 2*math.pi:
+        angle = angle - math.floor(angle/(2*math.pi))*2*math.pi
+    elif angle <= -2*math.pi:
+        angle = angle + math.floor(-angle/(2*math.pi))*2*math.pi
+    
+    if angle <= -math.pi:
+        angle = 2*math.pi + angle
+    elif angle > math.pi:
+        angle = -2*math.pi + angle
+
+    return angle
+
+
+def minimum_angle_diff(x, y):
+    d = math.fmod(y - x, (math.pi/2))
+    if d < -math.pi:
+        d = d + (math.pi/2)
+    if d > math.pi:
+        d = d - (math.pi/2)
+
+    return -d
+
+
+def match_pose(pose, dataset):
+    """ Given a pose and a dataset of pre-computed poses, find the best matching pose from the dataset """
+    matching_record = dataset[random.randint(0, len(dataset)-1)]
+    return matching_record
+
+
+
 class Application(tornado.web.Application):
     def __init__(self, args):
         self.args = args
@@ -34,7 +83,6 @@ class Application(tornado.web.Application):
 
         handlers = [
             (r"/", DemoHandler),
-            (r"/status_app", StatusHandler),
             (r"/frames", FrameHandler),
             (r"/twod", TwoDHandler),
             (r"/artwork", ArtworkHandler),
@@ -50,8 +98,6 @@ class Application(tornado.web.Application):
 
         super().__init__(handlers, **settings)
 
-    def get_artwork_json(id):
-        pass
 
 
     @tornado.gen.coroutine
@@ -65,6 +111,26 @@ class Application(tornado.web.Application):
             if msg is None: break
             self.last_frame = msg
 
+            # main control
+            if self.status == 'Idle':
+                # check if there is a person standing in the correct place
+                if is_user(self.last_frame):
+                    self.status = 'Capture'
+                    ArtworkHandler.send_artwork(json.dumps({'status': self.status}))
+            elif self.status == 'Capture':
+                yield tornado.gen.sleep(5)
+                msg = yield conn.read_message()
+                if msg is None: break
+                self.last_frame = msg
+                # perform inference on pose in last frame
+                best_artwork = match_pose(self.last_frame, self.artwork_dataset)
+                self.status = 'Display'
+                ArtworkHandler.send_artwork(json.dumps({'status': self.status, 'artwork': best_artwork}))
+            elif self.status == 'Display':
+                yield tornado.gen.sleep(7)
+                self.status = 'Idle'
+                ArtworkHandler.send_artwork(json.dumps({'status': self.status}))
+
 
     @tornado.gen.coroutine
     def subscribe_twod(self):
@@ -76,49 +142,14 @@ class Application(tornado.web.Application):
             msg = yield conn.read_message()
             if msg is None: break
             if self.last_frame is None: break
-            StatusHandler.send_status(self.status)
             FrameHandler.send_updates(self.last_frame)
             TwoDHandler.send_2d(msg)
-            ArtworkHandler.send_artwork(self.artwork_dataset[self.current_artwork])
-
-            # do some predictions here
-            # if self.status == 'Predict':
-            # ClassificationHandler.send_prediction()
 
 
 
 class DemoHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("index.html")
-
-
-
-class StatusHandler(tornado.websocket.WebSocketHandler):
-    waiters = set()
-
-    def check_origin(self, origin):
-        '''Allow from all origins'''
-        return True
-
-    def get_compression_options(self):
-        # Non-None enables compression with default options.
-        return {}
-
-    def open(self):
-        StatusHandler.waiters.add(self)
-        logging.info("connect: there are now %d connections", len(self.waiters))
-
-    def on_close(self):
-        StatusHandler.waiters.remove(self)
-        logging.info("disconnect: there are now %d connections", len(self.waiters))
-
-    @classmethod
-    def send_status(cls, status):
-        for waiter in cls.waiters:
-            try:
-                waiter.write_message(status)
-            except:
-                logging.error("Error sending message", exc_info=True)
 
 
 
@@ -200,10 +231,10 @@ class ArtworkHandler(tornado.websocket.WebSocketHandler):
         logging.info("disconnect: there are now %d connections", len(self.waiters))
 
     @classmethod
-    def send_artwork(cls, artwork):
+    def send_artwork(cls, artwork_msg):
         for waiter in cls.waiters:
             try:
-                waiter.write_message(artwork)
+                waiter.write_message(artwork_msg)
             except:
                 logging.error("Error sending message", exc_info=True)
 

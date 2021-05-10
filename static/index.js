@@ -1,7 +1,6 @@
 $(document).ready(function() {
     twod.start();
     frames.start();
-    status_app.start();
     artwork.start();
 });
 
@@ -47,23 +46,16 @@ var artwork = {
   },
 
   process: function(data) {
-    $('img.artwork').attr("src", data.primaryImageSmall);
-    $('span.name').html(data.title);
-    $('span.author').html(data.artistDisplayName)
-  }
-};
-
-var status_app = {
-  socket: null,
-  start: function() {
-    var url = "ws://" + location.host + "/status_app";
-    status_app.socket = new WebSocket(url);
-    status_app.socket.onmessage = function(event) {
-      status_app.process(event.data);
+    if(data.status == 'Idle') {
+      $('span.name').html('Idle')
+    } else if(data.status == 'Capture') {
+      $('span.name').html('Capture')
+      $('span.author').html('')
+    } else if(data.status == 'Display') {
+      $('img.artwork').attr("src", data.artwork.primaryImageSmall);
+      $('span.name').html(data.artwork.title);
+      $('span.author').html(data.artwork.artistDisplayName);
     }
-  },
 
-  process: function(data) {
-//    console.log(data)
   }
 };
