@@ -18,6 +18,7 @@ import tornado.gen
 parser = argparse.ArgumentParser(description='AlphaPose Demo')
 parser.add_argument('--websocket-server', type=str, help='ip address of websocker server')
 parser.add_argument('--local-port', type=int, default=6677, help="this server's local port")
+parser.add_argument('--skip-user', action='store_true', default=False, help="remove check for user and user alignment")
 
 root_path = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 
@@ -41,6 +42,17 @@ def is_user(msg):
                 if person_y > 500 and person_y < 900:
                     return True
     # check if any people are in the desired range
+
+
+def user_align(msg):
+    msg_dict = json.loads(msg)
+
+    if not 'people' in msg_dict:
+        return 'No user'
+    else:
+        # check direction
+        return 'foo'
+
 
 
 def shift_angle_range(angle):
@@ -112,24 +124,45 @@ class Application(tornado.web.Application):
             self.last_frame = msg
 
             # main control
-            if self.status == 'Idle':
-                # check if there is a person standing in the correct place
-                if is_user(self.last_frame):
-                    self.status = 'Capture'
+            if not self.args.skip_user:
+                if self.status == 'Idle':
+                    # check if there is a person standing in the correct place
+                    if is_user(self.last_frame):
+                        self.status = 'Align'
+                        ArtworkHandler.send_artwork(json.dumps({'status': self.status}))
+                elif self.status == 'Align':
+                    #if user_aligned(self.last_frame):
+                    pass
+                elif self.status == 'Capture':
+                    yield tornado.gen.sleep(5)
+                    msg = yield conn.read_message()
+                    if msg is None: break
+                    self.last_frame = msg
+                    # perform inference on pose in last frame
+                    best_artwork = match_pose(self.last_frame, self.artwork_dataset)
+                    self.status = 'Display'
+                    ArtworkHandler.send_artwork(json.dumps({'status': self.status, 'artwork': best_artwork}))
+                elif self.status == 'Display':
+                    yield tornado.gen.sleep(7)
+                    self.status = 'Idle'
                     ArtworkHandler.send_artwork(json.dumps({'status': self.status}))
-            elif self.status == 'Capture':
-                yield tornado.gen.sleep(5)
-                msg = yield conn.read_message()
-                if msg is None: break
-                self.last_frame = msg
-                # perform inference on pose in last frame
-                best_artwork = match_pose(self.last_frame, self.artwork_dataset)
-                self.status = 'Display'
-                ArtworkHandler.send_artwork(json.dumps({'status': self.status, 'artwork': best_artwork}))
-            elif self.status == 'Display':
-                yield tornado.gen.sleep(7)
-                self.status = 'Idle'
-                ArtworkHandler.send_artwork(json.dumps({'status': self.status}))
+            else:
+                if self.status == 'Idle':
+                    yield tornado.gen.sleep(2)
+                    self.status = 'Capture'
+                elif self.status == 'Capture':
+                    yield tornado.gen.sleep(5)
+                    msg = yield conn.read_message()
+                    if msg is None: break
+                    self.last_frame = msg
+                    # perform inference on pose in last frame
+                    best_artwork = match_pose(self.last_frame, self.artwork_dataset)
+                    self.status = 'Display'
+                    ArtworkHandler.send_artwork(json.dumps({'status': self.status, 'artwork': best_artwork}))
+                elif self.status == 'Display':
+                    yield tornado.gen.sleep(7)
+                    self.status = 'Idle'
+                    ArtworkHandler.send_artwork(json.dumps({'status': self.status}))
 
 
     @tornado.gen.coroutine
