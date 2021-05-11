@@ -33,25 +33,42 @@ def is_user(msg):
 
     # check if there are any people (at all)
     if not 'people' in msg_dict:
-        return False
+        return -1
     else:
         for person_id in msg_dict['people'].keys():
             person_x = msg_dict['people'][person_id]['avg_position'][0]
             person_y = msg_dict['people'][person_id]['avg_position'][1]
             if person_x > -600 and person_x < 600:
                 if person_y > 500 and person_y < 900:
-                    return True
-    # check if any people are in the desired range
+                    print(msg_dict['people'][person_id])
+                    return int(person_id)
+
+        return -1
 
 
-def user_align(msg):
+def user_alignment(msg, person_id):
     msg_dict = json.loads(msg)
 
     if not 'people' in msg_dict:
-        return 'No user'
+        return 'No users'
     else:
-        # check direction
-        return 'foo'
+        # check if same person is still in frame
+        if not str(person_id) in msg_dict['people']:
+            return 'No users'
+        else:
+            candidate_position = msg_dict['people'][person_id]['avg_position']
+            if candidate_position[0] > 500:
+                # needs to go left
+                return 'Left'
+            elif candidate_position[0] < -500:
+                # needs to go right
+                return 'Right'
+            elif candidate_position[1] > 700:
+                return 'Forward'
+            elif candidate_position[2] < 400:
+                return 'Backward'
+            else:
+                return 'Aligned'
 
 
 
@@ -91,7 +108,8 @@ class Application(tornado.web.Application):
         self.args = args
         self.last_frame = None
         self.status = 'Idle'
-        self.current_artwork = random.randint(0,87)
+        self.user_candidate_id = -1
+        self.current_artwork = random.randint(0,87) # initialize to a random artwork
 
         handlers = [
             (r"/", DemoHandler),
@@ -127,19 +145,28 @@ class Application(tornado.web.Application):
             if not self.args.skip_user:
                 if self.status == 'Idle':
                     # check if there is a person standing in the correct place
-                    if is_user(self.last_frame):
+                    candidate = is_user(self.last_frame)
+                    if candidate >= 0:
                         self.status = 'Align'
+                        self.user_candidate_id = candidate 
                         ArtworkHandler.send_artwork(json.dumps({'status': self.status}))
                 elif self.status == 'Align':
-                    #if user_aligned(self.last_frame):
-                    pass
+                    alignment_status = user_alignment(self.last_frame, self.user_candidate_id)
+                    if alignment_status == 'No users':
+                        self.status == 'Idle'
+                        ArtworkHandler.send_artwork(json.dumps({'status': self.status}))
+                    elif alignment_status == 'Aligned':
+                        self.status == 'Capture'
+                        ArtworkHandler.send_artwork(json.dumps({'status': self.status}))
+                    else:
+                        ArtworkHandler.send_artwork(json.dumps({'status': self.status, 'nudge': alignment_status}))
                 elif self.status == 'Capture':
                     yield tornado.gen.sleep(5)
                     msg = yield conn.read_message()
                     if msg is None: break
                     self.last_frame = msg
                     # perform inference on pose in last frame
-                    best_artwork = match_pose(self.last_frame, self.artwork_dataset)
+                    best_artwork = match_pose(self.last_frame, self.artwork_dataset, self.user_candidate_id)
                     self.status = 'Display'
                     ArtworkHandler.send_artwork(json.dumps({'status': self.status, 'artwork': best_artwork}))
                 elif self.status == 'Display':
