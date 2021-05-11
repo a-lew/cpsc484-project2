@@ -202,12 +202,18 @@ def match_pose(msg, person_id, dataset):
             matching_record = dataset[random.randint(0, len(dataset)-1)]
         else:
             minimum_pose_dist = math.inf
+            minimum_pose_stack = []
             person_keypoints = msg_dict['people'][str(person_id)]['keypoints']
             for i, source_art in enumerate(dataset):
                 candidate_pose_dist = pose_similarity(source_art['keypoints'], person_keypoints)
                 if candidate_pose_dist < minimum_pose_dist:
                     minimum_pose_dist = candidate_pose_dist
-                    matching_record = dataset[i]
+                    minimum_pose_stack.append(i)
+
+            if len(minimum_pose_stack) < 4:
+                matching_record = dataset[minimum_pose_stack[0]]
+            else:
+                matching_record = dataset[minimum_pose_stack[random.randint(0,3)]] 
     return matching_record
 
 

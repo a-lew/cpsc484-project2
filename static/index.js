@@ -30,8 +30,7 @@ var frames = {
   },
 
   process: function(data) {
-    $('p.framelog').html(data.ts)
-//    console.log(data)
+    console.log(data)
   }
 };
 
