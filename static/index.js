@@ -47,17 +47,17 @@ var artwork = {
 
   process: function(data) {
     if (data.status == 'Idle') {
-      $('h1.name').html('Idle');
+      $('h1.name').text('Idle');
       // we want to have a blank screen here
     } else if (data.status == 'Align') {
-      $('h1.name').html('Align');
+      $('h1.name').text('Align');
     } else if (data.status == 'Capture') {
-      $('h1.name').html('Capture');
+      $('h1.name').text('Capture');
       $('h2.artistDisplayName').html('');
     } else if(data.status == 'Display') {
-      $('figure.painting').attr("src", data.artwork.primaryImageSmall);
-      $('h1.name').html(data.artwork.title);
-      $('h2.artistDisplayName').html(data.artwork.artistDisplayName);
+      $('img.artwork').attr("src", data.artwork.primaryImageSmall);
+      $('h1.name').text(data.artwork.name);
+      $('h2.artistDisplayName').text(data.artwork.artistDisplayName);
     }
 
   }
