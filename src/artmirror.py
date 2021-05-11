@@ -143,6 +143,7 @@ class Application(tornado.web.Application):
             # main control
             if not self.args.skip_user:
                 if self.status == 'Idle':
+                    print(self.status)
                     # check if there is a person standing in the correct place
                     ArtworkHandler.send_artwork(json.dumps({'status': self.status}))
                     candidate = is_user(self.last_frame)
@@ -163,6 +164,7 @@ class Application(tornado.web.Application):
                     else:
                         ArtworkHandler.send_artwork(json.dumps({'status': self.status, 'nudge': alignment_status}))
                 elif self.status == 'Capture':
+                    print(self.status)
                     yield tornado.gen.sleep(5)
                     msg = yield conn.read_message()
                     if msg is None: break
@@ -172,6 +174,7 @@ class Application(tornado.web.Application):
                     self.status = 'Display'
                     ArtworkHandler.send_artwork(json.dumps({'status': self.status, 'artwork': best_artwork}))
                 elif self.status == 'Display':
+                    print(self.status)
                     yield tornado.gen.sleep(7)
                     self.status = 'Idle'
                     ArtworkHandler.send_artwork(json.dumps({'status': self.status}))
