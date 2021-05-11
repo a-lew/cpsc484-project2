@@ -302,7 +302,7 @@ class Application(tornado.web.Application):
                     if msg is None: break
                     self.last_frame = msg
                     # perform inference on pose in last frame
-                    best_artwork = match_pose(self.last_frame, self.artwork_dataset)
+                    best_artwork = match_pose(self.last_frame, 0, self.artwork_dataset)
                     self.status = 'Display'
                     ArtworkHandler.send_artwork(json.dumps({'status': self.status, 'artwork': best_artwork}))
                 elif self.status == 'Display':
@@ -424,7 +424,7 @@ def main():
 
     app = Application(args)
     app.listen(args.local_port, '0.0.0.0')
-    print(f"open http://127.0.0.1:{args.local_port} in your browser to preview the data")
+    print(f"open http://127.0.0.1:{args.local_port} in your browser to view the application")
     if not args.websocket_server:
         raise RuntimeError("Please specify the server to connect to with --websocket-server")
     tornado.ioloop.IOLoop.current().spawn_callback(app.subscribe_frames)

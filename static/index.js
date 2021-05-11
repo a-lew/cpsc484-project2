@@ -4,10 +4,12 @@ $(document).ready(function() {
     artwork.start();
 });
 
+var port = ":6677"
+
 var twod = {
   socket: null,
   start: function() {
-    var url = "ws://" + location.host + "/twod";
+    var url = "ws://" + location.hostname + port + "/twod";
     twod.socket = new WebSocket(url);
     twod.socket.onmessage = function(event) {
       twod.process(JSON.parse(event.data));
@@ -22,7 +24,7 @@ var twod = {
 var frames = {
   socket: null,
   start: function() {
-    var url = "ws://" + location.host + "/frames";
+    var url = "ws://" + location.hostname + port + "/frames";
     frames.socket = new WebSocket(url);
     frames.socket.onmessage = function(event) {
       frames.process(JSON.parse(event.data));
@@ -37,7 +39,7 @@ var frames = {
 var artwork = {
   socket: null,
   start: function() {
-    var url = "ws://" + location.host + "/artwork";
+    var url = "ws://" + location.hostname + port + "/artwork";
     artwork.socket = new WebSocket(url);
     artwork.socket.onmessage = function(event) {
       artwork.process(JSON.parse(event.data));
