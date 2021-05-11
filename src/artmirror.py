@@ -37,10 +37,9 @@ def is_user(msg):
     else:
         for person_id in msg_dict['people'].keys():
             person_x = msg_dict['people'][person_id]['avg_position'][0]
-            person_y = msg_dict['people'][person_id]['avg_position'][1]
+            person_z = msg_dict['people'][person_id]['avg_position'][2]
             if person_x > -600 and person_x < 600:
-                if person_y > 500 and person_y < 900:
-                    print(msg_dict['people'][person_id])
+                if person_z > 500 and person_z < 4900:
                     return int(person_id)
 
         return -1
@@ -54,18 +53,18 @@ def user_alignment(msg, person_id):
     else:
         # check if same person is still in frame
         if not str(person_id) in msg_dict['people']:
-            return 'No users'
+            return 'Previous user not found'
         else:
-            candidate_position = msg_dict['people'][person_id]['avg_position']
+            candidate_position = msg_dict['people'][str(person_id)]['avg_position']
             if candidate_position[0] > 500:
                 # needs to go left
                 return 'Left'
             elif candidate_position[0] < -500:
                 # needs to go right
                 return 'Right'
-            elif candidate_position[1] > 700:
+            elif candidate_position[2] > 4700:
                 return 'Forward'
-            elif candidate_position[2] < 400:
+            elif candidate_position[2] < 600:
                 return 'Backward'
             else:
                 return 'Aligned'
@@ -96,7 +95,7 @@ def minimum_angle_diff(x, y):
     return -d
 
 
-def match_pose(pose, dataset):
+def match_pose(pose, dataset, user_id):
     """ Given a pose and a dataset of pre-computed poses, find the best matching pose from the dataset """
     matching_record = dataset[random.randint(0, len(dataset)-1)]
     return matching_record
@@ -145,6 +144,7 @@ class Application(tornado.web.Application):
             if not self.args.skip_user:
                 if self.status == 'Idle':
                     # check if there is a person standing in the correct place
+                    ArtworkHandler.send_artwork(json.dumps({'status': self.status}))
                     candidate = is_user(self.last_frame)
                     if candidate >= 0:
                         self.status = 'Align'
@@ -152,11 +152,13 @@ class Application(tornado.web.Application):
                         ArtworkHandler.send_artwork(json.dumps({'status': self.status}))
                 elif self.status == 'Align':
                     alignment_status = user_alignment(self.last_frame, self.user_candidate_id)
-                    if alignment_status == 'No users':
+                    print(alignment_status)
+                    print(self.status)
+                    if alignment_status == 'No users' or alignment_status == 'Previous user not found':
                         self.status == 'Idle'
                         ArtworkHandler.send_artwork(json.dumps({'status': self.status}))
                     elif alignment_status == 'Aligned':
-                        self.status == 'Capture'
+                        self.status = 'Capture'
                         ArtworkHandler.send_artwork(json.dumps({'status': self.status}))
                     else:
                         ArtworkHandler.send_artwork(json.dumps({'status': self.status, 'nudge': alignment_status}))

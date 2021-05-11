@@ -46,11 +46,14 @@ var artwork = {
   },
 
   process: function(data) {
-    if(data.status == 'Idle') {
-      $('span.name').html('Idle')
-    } else if(data.status == 'Capture') {
-      $('span.name').html('Capture')
-      $('span.author').html('')
+    if (data.status == 'Idle') {
+      $('span.name').html('Idle');
+      // we want to have a blank screen here
+    } else if (data.status == 'Align') {
+      $('span.name').html('Align');
+    } else if (data.status == 'Capture') {
+      $('span.name').html('Capture');
+      $('span.author').html('');
     } else if(data.status == 'Display') {
       $('img.artwork').attr("src", data.artwork.primaryImageSmall);
       $('span.name').html(data.artwork.title);
