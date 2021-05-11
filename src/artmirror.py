@@ -39,8 +39,8 @@ def is_user(msg):
         for person_id in msg_dict['people'].keys():
             person_x = msg_dict['people'][person_id]['avg_position'][0]
             person_z = msg_dict['people'][person_id]['avg_position'][2]
-            if person_x > -600 and person_x < 600:
-                if person_z > 500 and person_z < 4900:
+            if person_x > -500 and person_x < 500:
+                if person_z > 200 and person_z < 3400:
                     return int(person_id)
 
         return -1
@@ -57,16 +57,14 @@ def user_alignment(msg, person_id):
             return 'Previous user not found'
         else:
             candidate_position = msg_dict['people'][str(person_id)]['avg_position']
-            if candidate_position[0] > 500:
-                # needs to go left
-                return 'Left'
-            elif candidate_position[0] < -500:
-                # needs to go right
-                return 'Right'
-            elif candidate_position[2] > 4700:
+            if candidate_position[0] > -250:
                 return 'Forward'
-            elif candidate_position[2] < 600:
+            elif candidate_position[0] < 250:
                 return 'Backward'
+            elif candidate_position[2] > 3000:
+                return 'Left'
+            elif candidate_position[2] < 1800:
+                return 'Right'
             else:
                 return 'Aligned'
 
