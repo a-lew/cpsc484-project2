@@ -56,8 +56,11 @@ var artwork = {
       $('h2.artistDisplayName').html('');
     } else if(data.status == 'Display') {
       $('img.artwork').attr("src", data.artwork.primaryImageSmall);
-      $('h1.name').text(data.artwork.name);
+      $('h1.name').text(data.artwork.title);
       $('h2.artistDisplayName').text(data.artwork.artistDisplayName);
+      $('p.objectDate').text(data.artwork.objectDate)
+      $('p.medium').text(data.artwork.medium)
+      $('p.repository').text(data.artwork.repository)
     }
 
   }
