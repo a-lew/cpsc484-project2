@@ -8,14 +8,11 @@
   <title>Art Mirror</title>
   <meta name="description" content="Strike a pose and see a painting that matches!">
   <meta name="author" content="Alex Lew, Kaloyan Kolev, Paulos Thomas">
-      
+
+  <!-- Custom style to make sure images don't exceed height -->
   <style>
-    img.artwork {
-        height: 100%;
-    }
+  .image img { height: 100%; object-fit: contain; }
   </style>
-
-
 
 </head>
 
@@ -43,7 +40,7 @@
     </div>
     <div class="column">
       <div class="box">
-        <figure class="image">
+        <figure class="image is-5by4">
           <img class="artwork">
         </figure>
     </div>
