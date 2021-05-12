@@ -25,7 +25,7 @@ $(venv) pip install -r requirements.txt
 
 First, navigate to the root of the repository and activate the virtual environment. Then, run the command:
  ```
- $(venv) python -m src.artmirror --websocket-server 172.29.41.16:8888 --local-port 6677
+ $(venv) python -m src.artmirror --websocket-server 172.28.142.145:8888 --local-port 6677
  ```
  Finally, navigate to [http://localhost:6677](http://localhost:6677) in a web browser to preview the prototype.
 
