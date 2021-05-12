@@ -264,7 +264,7 @@ class Application(tornado.web.Application):
                     if candidate >= 0:
                         self.status = 'Align'
                         self.user_candidate_id = candidate 
-                        ArtworkHandler.send_artwork(json.dumps({'status': self.status}))
+                        ArtworkHandler.send_artwork(json.dumps({'status': self.status, 'nudge': 'none'}))
                 elif self.status == 'Align':
                     alignment_status = user_alignment(self.last_frame, self.user_candidate_id)
                     print(alignment_status)
@@ -289,7 +289,7 @@ class Application(tornado.web.Application):
                     ArtworkHandler.send_artwork(json.dumps({'status': self.status, 'artwork': best_artwork}))
                 elif self.status == 'Display':
                     print(self.status)
-                    yield tornado.gen.sleep(7)
+                    yield tornado.gen.sleep(11)
                     self.status = 'Idle'
                     ArtworkHandler.send_artwork(json.dumps({'status': self.status}))
             else:
@@ -306,7 +306,7 @@ class Application(tornado.web.Application):
                     self.status = 'Display'
                     ArtworkHandler.send_artwork(json.dumps({'status': self.status, 'artwork': best_artwork}))
                 elif self.status == 'Display':
-                    yield tornado.gen.sleep(7)
+                    yield tornado.gen.sleep(11)
                     self.status = 'Idle'
                     ArtworkHandler.send_artwork(json.dumps({'status': self.status}))
 

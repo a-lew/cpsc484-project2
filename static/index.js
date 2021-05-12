@@ -48,20 +48,28 @@ var artwork = {
 
   process: function(data) {
     if (data.status == 'Idle') {
-      $('h1.name').text('Idle');
-      // we want to have a blank screen here
+      $('img.artwork').attr("src", "idle.svg");
     } else if (data.status == 'Align') {
-      $('h1.name').text('Align');
+      if (data.nudge == 'Left') {
+        $('img.artwork').attr("src", "align_left.svg");
+      } else if (data.nudge == 'Right') {
+        $('img.artwork').attr("src", "align_right.svg");
+      } else if (data.nudge == 'Forward') {
+        $('img.artwork').attr("src", "align_forward.svg");
+      } else if (data.nudge == 'Backward') {
+        $('img.artwork').attr("src", "align_backward.svg");
+      } else {
+        $('img.artwork').attr("src", "idle.svg");
+      }
     } else if (data.status == 'Capture') {
-      $('h1.name').text('Capture');
-      $('h2.artistDisplayName').html('');
+      $('img.artwork').attr("src", "capture.svg");
     } else if(data.status == 'Display') {
       $('img.artwork').attr("src", data.artwork.primaryImageSmall);
       $('h1.name').text(data.artwork.title);
       $('h2.artistDisplayName').text(data.artwork.artistDisplayName);
-      $('p.objectDate').text(data.artwork.objectDate)
-      $('p.medium').text(data.artwork.medium)
-      $('p.repository').text(data.artwork.repository)
+      $('p.objectDate').text(data.artwork.objectDate);
+      $('p.medium').text(data.artwork.medium);
+      $('p.repository').text(data.artwork.repository);
     }
 
   }
