@@ -1,5 +1,6 @@
 """Script for single-gpu/multi-gpu demo."""
 import argparse
+from collections import deque
 import json
 import logging
 import math
@@ -199,19 +200,15 @@ def match_pose(msg, person_id, dataset):
         if not str(person_id) in msg_dict['people']:
             matching_record = dataset[random.randint(0, len(dataset)-1)]
         else:
-            minimum_pose_dist = math.inf
-            minimum_pose_stack = []
+            minimum_pose_dict = {}
             person_keypoints = msg_dict['people'][str(person_id)]['keypoints']
             for i, source_art in enumerate(dataset):
-                candidate_pose_dist = pose_similarity(source_art['keypoints'], person_keypoints)
-                if candidate_pose_dist < minimum_pose_dist:
-                    minimum_pose_dist = candidate_pose_dist
-                    minimum_pose_stack.append(i)
+                minimum_pose_dict[i] = pose_similarity(source_art['keypoints'], person_keypoints)
 
-            if len(minimum_pose_stack) < 4:
-                matching_record = dataset[minimum_pose_stack[0]]
-            else:
-                matching_record = dataset[minimum_pose_stack[random.randint(0,3)]] 
+            # sort minimum_pose_dict by Value
+            sorted_minimum_pose = sorted(minimum_pose_dict.items(), key=lambda kv: kv[1])
+            # pick a random key from top 15
+            matching_record = dataset[sorted_minimum_pose[random.randint(0,15)][0]] 
     return matching_record
 
 
@@ -222,6 +219,7 @@ class Application(tornado.web.Application):
         self.last_frame = None
         self.status = 'Idle'
         self.user_candidate_id = -1
+        self.frame_counter = 0
         self.current_artwork = random.randint(0,290) # initialize to a random artwork
 
         handlers = [
@@ -258,6 +256,7 @@ class Application(tornado.web.Application):
             if not self.args.skip_user:
                 if self.status == 'Idle':
                     print(self.status)
+                    self.frame_counter = 0
                     # check if there is a person standing in the correct place
                     ArtworkHandler.send_artwork(json.dumps({'status': self.status}))
                     candidate = is_user(self.last_frame)
@@ -277,6 +276,11 @@ class Application(tornado.web.Application):
                         ArtworkHandler.send_artwork(json.dumps({'status': self.status}))
                     else:
                         ArtworkHandler.send_artwork(json.dumps({'status': self.status, 'nudge': alignment_status}))
+                        self.frame_counter += 1
+                        if self.frame_counter > 40:
+                            self.status == 'Idle'
+                            print("Too many frames without alignment; reset to Idle")
+                            ArtworkHandler.send_artwork(json.dumps({'status': self.status}))
                 elif self.status == 'Capture':
                     print(self.status)
                     yield tornado.gen.sleep(5)
