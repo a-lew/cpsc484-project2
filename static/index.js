@@ -63,7 +63,6 @@ var artwork = {
       }
     } else if (data.status == 'Capture') {
       $('img.artwork').attr("src", "capture.svg");
-      $('img.artwork').attr("src", data.artwork.primaryImageSmall);
       $('h1.name').text("Searching...");
       $('h2.artistDisplayName').text("...");
       $('p.objectDate').text("...");
