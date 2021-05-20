@@ -22,6 +22,8 @@ root_path = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file
 
 
 class Application(tornado.web.Application):
+    """Art Mirror backend that reads Frames and TwoD websockets,
+       publishes states to Art Mirror frontend"""
     def __init__(self, args):
         self.args = args
         self.last_frame = None
@@ -34,7 +36,8 @@ class Application(tornado.web.Application):
             (r"/frames", FrameHandler),
             (r"/twod", TwoDHandler),
             (r"/artwork", ArtworkHandler),
-            (r"/(.*)", tornado.web.StaticFileHandler, {"path": "templates", "default_filename": "index.html"})
+            (r"/(.*)", tornado.web.StaticFileHandler, {"path": "templates",
+                                                       "default_filename": "index.html"})
         ]
         settings = dict(
             template_path=os.path.join(root_path, "templates"),
@@ -55,7 +58,8 @@ class Application(tornado.web.Application):
         conn = yield tornado.websocket.websocket_connect(websocket_server)
         while True:
             msg = yield conn.read_message()
-            if msg is None: break
+            if msg is None:
+                break
             self.last_frame = msg
 
             # main control
@@ -66,30 +70,35 @@ class Application(tornado.web.Application):
                 candidate = is_user(self.last_frame)
                 if candidate >= 0:
                     self.status = 'Align'
-                    self.user_candidate_id = candidate 
-                    ArtworkHandler.send_artwork(json.dumps({'status': self.status, 'nudge': 'none'}))
+                    self.user_candidate_id = candidate
+                    ArtworkHandler.send_artwork(json.dumps({'status': self.status,
+                                                            'nudge': 'none'}))
             elif self.status == 'Align':
                 alignment_status = user_alignment(self.last_frame, self.user_candidate_id)
                 print(alignment_status)
                 print(self.status)
-                if alignment_status == 'No users' or alignment_status == 'Previous user not found':
-                    self.status == 'Idle'
+                if alignment_status in ('No users', 'Previous user not found'):
+                    self.status = 'Idle'
                     ArtworkHandler.send_artwork(json.dumps({'status': self.status}))
                 elif alignment_status == 'Aligned':
                     self.status = 'Capture'
                     ArtworkHandler.send_artwork(json.dumps({'status': self.status}))
                 else:
-                    ArtworkHandler.send_artwork(json.dumps({'status': self.status, 'nudge': alignment_status}))
+                    ArtworkHandler.send_artwork(json.dumps({'status': self.status,
+                                                            'nudge': alignment_status}))
             elif self.status == 'Capture':
                 print(self.status)
                 yield tornado.gen.sleep(5)
                 msg = yield conn.read_message()
-                if msg is None: break
+                if msg is None:
+                    break
                 self.last_frame = msg
                 # perform inference on pose in last frame
-                best_artwork = match_pose(self.last_frame, self.user_candidate_id, self.artwork_dataset)
+                best_artwork = match_pose(self.last_frame, self.user_candidate_id, \
+                                          self.artwork_dataset)
                 self.status = 'Display'
-                ArtworkHandler.send_artwork(json.dumps({'status': self.status, 'artwork': best_artwork}))
+                ArtworkHandler.send_artwork(json.dumps({'status': self.status,
+                                                        'artwork': best_artwork}))
             elif self.status == 'Display':
                 print(self.status)
                 yield tornado.gen.sleep(11)
@@ -105,14 +114,17 @@ class Application(tornado.web.Application):
         conn = yield tornado.websocket.websocket_connect(websocket_server)
         while True:
             msg = yield conn.read_message()
-            if msg is None: break
-            if self.last_frame is None: break
+            if msg is None:
+                break
+            if self.last_frame is None:
+                break
             FrameHandler.send_updates(self.last_frame)
             TwoDHandler.send_2d(msg)
 
 
 
 def main():
+    """Main function that reads command-line args and starts Tornado server"""
     args = parser.parse_args()
 
     app = Application(args)

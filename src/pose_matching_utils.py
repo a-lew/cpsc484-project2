@@ -1,3 +1,4 @@
+"""Functions to compute pose similarity and matching"""
 import json
 import random
 
@@ -5,6 +6,7 @@ import numpy as np
 
 
 def pose_similarity(source_pose_keypoints, found_pose_keypoints):
+    """Function to compute inverse cosine similarity between two keypoints"""
     found_pose_vec = np.zeros(51)
     source_pose_vec = np.zeros(51)
     root = (0, 0)
@@ -87,17 +89,18 @@ def pose_similarity(source_pose_keypoints, found_pose_keypoints):
             found_pose_vec[49] = found_pose_keypoints[keypoint_id][1] - root[1]
             source_pose_vec[48] = source_pose_keypoints[48] - source_root[0]
             source_pose_vec[49] = source_pose_keypoints[49] - source_root[1]
-    
+
     # mask new vectors
     found_vec = found_pose_vec[15:]
     source_vec = source_pose_vec[15:]
-    pose_distance = 1 - (np.dot(found_vec.T, source_vec) / (np.linalg.norm(found_vec)*np.linalg.norm(source_vec)))
-    # pose_distance = 1 - (np.dot(found_pose_vec.T, source_pose_vec) / (np.linalg.norm(found_pose_vec)*np.linalg.norm(source_pose_vec)))
+    pose_distance = 1 - (np.dot(found_vec.T, source_vec) / \
+                    (np.linalg.norm(found_vec)*np.linalg.norm(source_vec)))
     return pose_distance
 
 
 def match_pose(msg, person_id, dataset):
-    """ Given a pose and a dataset of pre-computed poses, find the best matching pose from the dataset """
+    """ Given a pose and a dataset of pre-computed poses,
+        find the best matching pose from the dataset """
 
     # get the pose from the frame / msg
     msg_dict = json.loads(msg)
@@ -117,5 +120,5 @@ def match_pose(msg, person_id, dataset):
             # sort minimum_pose_dict by Value
             sorted_minimum_pose = sorted(minimum_pose_dict.items(), key=lambda kv: kv[1])
             # pick a random key from top 15
-            matching_record = dataset[sorted_minimum_pose[random.randint(0,15)][0]] 
+            matching_record = dataset[sorted_minimum_pose[random.randint(0,15)][0]]
     return matching_record
